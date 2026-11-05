@@ -439,3 +439,6 @@ Humans read in metaphor. The game is the greater meaning; the quest is inside it
 Endgame phase is complete (Tower, shinies, milestones/titles all live).
 Cities + route loop are live. Dan declined dailies and the rival for now. Next ideas: real-phone playtest + stats (the cities already have distinct layouts; only the four routes share the zone builder's structure). Waiting on Dan's phone playtest + stats. Candidate features: weekly Tower twist, daily challenge battle, Tower leaderboard (only if friends play). Housekeeping: split the test run, split app.js, and keep balance checks per change. Real-phone check of Tower, shiny sparkle/vibration and titles still pending.
 
+
+## To-do list (Dan's notes; add new items here)
+- [ ] "Should be online eventually" (Dan, 2026-11-05). Wording is vague: not yet confirmed whether it means online play/multiplayer, more online features beyond cloud saves, or something else. Ask Dan before building. Cloud saves already exist (see "GitHub Pages + online saves").

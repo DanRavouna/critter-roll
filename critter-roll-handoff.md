@@ -453,3 +453,5 @@ Cities + route loop are live. Dan declined dailies and the rival for now. Next i
 - Events: all three kinds (story moments, timed/seasonal, boss/battle events), tied to the storyline.
 - Visuals (houses and world): do ONE place first; once its quality is right, apply that level to all places. Which place goes first is not chosen yet.
 - Follow-up answers (Dan, 2026-11-05): first place for the visuals pass is Mossbrook. Attacks: existing saves stay as they are for now (critters keep the moves they know); this is a later task anyway.
+- [ ] Vary the attacks (Dan, 2026-11-05): currently all attacks do the same thing at different intensities. They need to differ in kind, not just strength. Ties in with the evolution-unlocked attacks item (each unlocked attack should feel different). Balance impact: run the balance sims after.
+- [ ] More work on the attack VFX (Dan, 2026-11-05). Builds on the earlier attack visual effects work (see "Attack visual effects" in this file). Should follow the attack variety so each attack kind gets its own look.

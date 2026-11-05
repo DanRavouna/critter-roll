@@ -452,3 +452,4 @@ Cities + route loop are live. Dan declined dailies and the rival for now. Next i
 - Attacks: spread across evolution stages so short lines still reach 4 attacks at the final form. Not answered: what happens to existing saves whose critters already know more moves (they must keep loading with no progress dropped).
 - Events: all three kinds (story moments, timed/seasonal, boss/battle events), tied to the storyline.
 - Visuals (houses and world): do ONE place first; once its quality is right, apply that level to all places. Which place goes first is not chosen yet.
+- Follow-up answers (Dan, 2026-11-05): first place for the visuals pass is Mossbrook. Attacks: existing saves stay as they are for now (critters keep the moves they know); this is a later task anyway.

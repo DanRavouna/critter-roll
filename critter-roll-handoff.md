@@ -446,3 +446,9 @@ Cities + route loop are live. Dan declined dailies and the rival for now. Next i
 - [ ] Attacks unlock with evolution (Dan, 2026-11-05): base form starts with 1 attack, next evolution 2, next 3, and the final (ultimate) form has all 4. Open: how this maps onto critters with fewer than 3 evolution stages, and what happens to existing saves whose critters already know more moves (must keep loading, no progress dropped). This changes balance, so run the balance sims after.
 - [ ] Set up events with a storyline (Dan, 2026-11-05). Details not given yet (what kind of events, how they tie into the quest). Per CLAUDE.md, each event needs its one-sentence "Meaning" inside the quest before it is built, and it should hint rather than tell.
 - [ ] Update the general visuals of the world (Dan, 2026-11-05): many places look bare ("lines"), missing rocks and small formations to make them feel lively. Needs a pass over the places to find the empty ones. Per CLAUDE.md, props must serve each place's meaning, not just fill space. Related to the houses visuals item above.
+
+### Answers from Dan (2026-11-05), to the notes above
+- Online = multiplayer. Cloud saves already exist; multiplayer is a separate, later feature.
+- Attacks: spread across evolution stages so short lines still reach 4 attacks at the final form. Not answered: what happens to existing saves whose critters already know more moves (they must keep loading with no progress dropped).
+- Events: all three kinds (story moments, timed/seasonal, boss/battle events), tied to the storyline.
+- Visuals (houses and world): do ONE place first; once its quality is right, apply that level to all places. Which place goes first is not chosen yet.

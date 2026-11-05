@@ -442,3 +442,4 @@ Cities + route loop are live. Dan declined dailies and the rival for now. Next i
 
 ## To-do list (Dan's notes; add new items here)
 - [ ] "Should be online eventually" (Dan, 2026-11-05). Wording is vague: not yet confirmed whether it means online play/multiplayer, more online features beyond cloud saves, or something else. Ask Dan before building. Cloud saves already exist (see "GitHub Pages + online saves").
+- [ ] Update the visuals of the houses (Dan, 2026-11-05). Per CLAUDE.md, write the one-sentence "Meaning" for the houses before changing them, and refine it with Dan. Details (which houses, what style) not given yet.

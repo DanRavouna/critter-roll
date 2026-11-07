@@ -3095,7 +3095,17 @@ const WORLD = (() => {
   $('check').onclick = () => check();
   // ---------- Submit: push mapedits.json to main through the viewer's GitHub connector (claude.ai page only). A GitHub Action on main then rebuilds index.html, runs the smoke tests and deploys. ----------
   const GH = { server: 'github', owner: 'danravouna', repo: 'critter-roll', path: 'src/world/mapedits.json', branch: 'main' };
-  let mcp = null; if (window.claude && typeof window.claude.use === 'function') window.claude.use('mcp').then((ns) => { mcp = ns; if (ns) $('submit').hidden = false; }, () => {});
+  let mcp = null, perms = null; if (window.claude && typeof window.claude.use === 'function') { window.claude.use('mcp').then((ns) => { mcp = ns; if (ns) $('submit').hidden = false; }, () => {}); window.claude.use('permissions').then((ns) => { perms = ns; }, () => {}); }
+  // The page must be allowed to use GitHub before the call: ask on the click (the first call's own ask does not always show, and then the call reports upstream_error without reaching GitHub).
+  async function allowed() {
+    if (!perms) return true;
+    let st = await perms.state('mcp:github').catch(() => 'unavailable');
+    if (st === 'prompt') { report('Allow this page to use GitHub when claude.ai asks…'); st = ((await perms.request(['mcp:github'])) || {})['mcp:github'] || 'unavailable'; }
+    if (st === 'granted' || st === 'unavailable') return true;   // unavailable: an older viewer that cannot say; let the call decide
+    report('Not submitted: this page is not allowed to use GitHub for you. Open the page\'s Permissions menu (⋮ at the top), switch GitHub on, then press Submit again.' + (st === 'denied' ? '' : ' (' + st + ')'));
+    try { if (await ask('Open the Permissions panel now?')) { await perms.manage(); } } catch (e) { /* the panel did not open: the message above says where it is */ }
+    return false;
+  }
   const jsonText = () => { const d = toData(), ids = Object.keys(d); return ids.length ? '{\n' + ids.map((id) => '  ' + JSON.stringify(id) + ': ' + JSON.stringify(d[id])).join(',\n') + '\n}\n' : '{}\n'; };
   function unreachable() {   // every edited map must pass the walkability check before it goes live
     const out = [], keep = cur; Object.keys(edits).forEach((id) => { open(id); check(); if (flags && flags.length) out.push(MAPS[id].name || id); });
@@ -3105,7 +3115,8 @@ const WORLD = (() => {
     if (!mcp) return; const ids = Object.keys(edits);
     if (!ids.length) { report('Nothing to submit: no map differs from the generated one.'); return; }
     report('Checking that every exit and door can still be reached…'); const bad = unreachable(); if (bad.length) { report('Not submitted. An exit or a door cannot be reached on: ' + bad.join(', ') + '. Fix those first (⋯ → Check walkability shows them in red).'); return; }
-    report(''); const note = await ask('One line for the commit: what do these edits mean inside the quest?\n(Maps: ' + ids.map((id) => MAPS[id].name || id).join(', ') + ')', true); if (note == null) return;
+    report(''); if (!(await allowed())) return;
+    const note = await ask('One line for the commit: what do these edits mean inside the quest?\n(Maps: ' + ids.map((id) => MAPS[id].name || id).join(', ') + ')', true); if (note == null) return;
     if (!note.trim()) { report('Not submitted: a meaning line is required (the standing rule: every place says its piece of the meaning).'); return; }
     report('Submitting…'); $('submit').disabled = true;
     try {
@@ -3121,7 +3132,9 @@ const WORLD = (() => {
         : c === 'needs_reauth' ? 'GitHub needs to be reconnected in claude.ai Settings → Connectors.'
         : c === 'approval_required' || c === 'consent_required' ? 'Not submitted: the page needs your approval to use GitHub. Allow it when asked and press Submit again.'
         : c === 'not_in_manifest' || c === 'blocked_by_policy' ? 'Not submitted: this page is not allowed to use GitHub for you (' + c + ').'
-        : c === 'tool_error' ? 'GitHub refused the change: ' + (e.message || '') : 'Not submitted (' + (c || 'error') + '): ' + (e && e.message || '') + (c === 'server_unavailable' || c === 'upstream_error' ? ' Check the repository before trying again: the commit may still have happened.' : ''));
+        : c === 'tool_error' ? 'GitHub refused the change: ' + (e.message || '')
+        : (c === 'upstream_error' && e.retryable) ? 'Not submitted: GitHub access for this page is not confirmed yet, so the call did not reach GitHub. Allow GitHub for this page (its Permissions menu, ⋮ at the top), wait a few seconds, then press Submit again.'
+        : 'Not submitted (' + (c || 'error') + '): ' + (e && e.message || '') + (c === 'server_unavailable' || c === 'upstream_error' ? ' Check the repository before trying again: the commit may still have happened.' : ''));
     }
     $('submit').disabled = false;
   };

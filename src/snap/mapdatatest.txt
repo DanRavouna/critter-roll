@@ -1,0 +1,13 @@
+maps: # start: town
+ok every map is plain data (no functions anywhere) | []
+ok every map survives a JSON round trip and has the core fields | []
+ok the old game still finds its map helpers on WORLD (attached by maps.js) | ['object', 'object', 'function']
+ok engine/world.js does not mention 'town'
+ok engine/world.js does not mention ZONES
+ok engine/world.js does not mention ADV.
+ok engine/world.js does not mention ACT.
+ok engine/world.js does not mention dg-
+ok engine/world.js does not mention Sproutvale
+ok arrival into the start map from a zone uses that edge | [#...]
+errors: none
+ok no page errors | []

@@ -1464,6 +1464,8 @@ const APP = (() => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem('critter-roll:world') || 'null'); } catch (e) {}
     WORLD.init($('world'), {
       onInteract: interact, onNear: setNear, onEncounter: encounter, npcs: npcList(),
+      // what the engine no longer knows about this game: the action layer, the dungeon objects' art and light, Sproutvale's own drawings
+      act: ACT, objLight: (o, st) => (ADV.LIGHT[o.kind] ? ADV.LIGHT[o.kind](o, st) : 0), objArt: (k) => ADV.ART[k], drawUnder: LEGACY_MAPS.drawUnder, drawOver: LEGACY_MAPS.drawOver,
       tint: () => (game.state.settings && game.state.settings.daynight === false) ? 'day' : timeOfDay(),
       objState: objState, carry: () => carry, relit: () => !!advOf().flags.lampLit, homeLit: homeLitNow, weather: () => weatherAt(WORLD.map.id), still: stillMotion, ambient: () => !(game.state.settings && game.state.settings.ambient === false),
       exitLocked: (e) => !game.props.noGates && ROUTE_GATES[e.to] && WORLD.map.id.indexOf('route-') !== 0 ? game.levelInfo(game.state.xp || 0).level < ROUTE_GATES[e.to] : WORLD.map.id === 'town' && e.to !== 'town' && !game.props.noGates && (e.to === 'peak' ? ((game.state.npc && game.state.npc.seals) || []).length < 4 : game.levelInfo(game.state.xp || 0).level < GATES[e.to]),

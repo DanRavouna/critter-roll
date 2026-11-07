@@ -9,3 +9,9 @@ h = open(W + 'shell.html').read()
 js = '\n'.join(mapedits if p == 'mapedits' else open(f'{W}{p}.js').read() for p in ['runtime', 'pixel', 'landmarks', 'adventure', 'pxworld', 'weather', 'ambient', 'mapedits', 'world', 'vfx', 'action', 'cloud', 'music', 'flavor', 'base', 'data', 'game', 'app']) + '\n'
 h = h.replace('/*@@JS@@*/', js, 1).replace('<!--@@SCREEN@@-->', open(W + 'screen.html').read(), 1)
 open(OUT, 'w').write(h); print('built', os.path.normpath(OUT), len(h) // 1024, 'KB')
+
+# The map editor (editor.html) is built from the same engine pieces, so what it draws is what the game draws. (Editor branch only, never on main.)
+if len(sys.argv) <= 1:
+    ej = '\n'.join(mapedits if p == 'mapedits' else open(f'{W}{p}.js').read() for p in ['pixel', 'landmarks', 'adventure', 'pxworld', 'weather', 'ambient', 'mapedits', 'world', 'editor']) + '\n'
+    eh = open(W + 'editor.html').read().replace('/*@@JS@@*/', ej, 1)
+    open(os.path.join(HERE, '..', 'editor.html'), 'w').write(eh); print('built editor.html', len(eh) // 1024, 'KB')

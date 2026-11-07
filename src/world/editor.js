@@ -203,6 +203,16 @@
     render();
   }
 
+  // ---------- in-page dialogs (the browser's prompt/confirm are blocked inside the claude.ai page) ----------
+  function ask(text, withInput) {
+    return new Promise((res) => {
+      const box = $('ask'), inp = $('askin'); $('asktext').textContent = text; inp.hidden = !withInput; inp.value = ''; box.classList.add('open');
+      const done = (v) => { box.classList.remove('open'); $('askok').onclick = $('askno').onclick = null; inp.onkeydown = null; res(v); };
+      $('askok').onclick = () => done(withInput ? inp.value : true); $('askno').onclick = () => done(withInput ? null : false);
+      inp.onkeydown = (e) => { if (e.key === 'Enter') done(inp.value); if (e.key === 'Escape') done(null); };
+      if (withInput) setTimeout(() => inp.focus(), 50);
+    });
+  }
   // ---------- file, playtest, view ----------
   function exportFile() {
     const d = toData(), ids = Object.keys(d);
@@ -217,7 +227,7 @@
   $('import').onclick = () => $('file').click();
   $('file').onchange = (e) => {
     const f = e.target.files[0]; if (!f) return; const r = new FileReader();
-    r.onload = () => { try { const s = String(r.result), d = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}') + 1)); if (!confirm('Replace the current edits with the ones in this file?')) return; load(d); saveDraft(); listMaps(); dirtyTerrain = true; render(); msg('Imported.'); } catch (x) { msg('That file could not be read as map edits.', true); } };
+    r.onload = async () => { try { const s = String(r.result), d = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}') + 1)); if (!(await ask('Replace the current edits with the ones in this file?'))) return; load(d); saveDraft(); listMaps(); dirtyTerrain = true; render(); msg('Imported.'); } catch (x) { msg('That file could not be read as map edits.', true); } };
     r.readAsText(f); e.target.value = '';
   };
   // Playtest: next to the game (GitHub Pages, a local build) the draft travels through this browser's storage; hosted elsewhere (a private claude.ai page) it travels in the URL.
@@ -240,10 +250,10 @@
   }
   $('submit').onclick = async () => {
     if (!mcp) return; const ids = Object.keys(edits);
-    if (!ids.length) { msg('Nothing to submit: no map differs from the generated one.', true); return; }
-    const bad = unreachable(); if (bad.length) { report('Not submitted. An exit or a door cannot be reached on: ' + bad.join(', ') + '. Fix those first (⋯ → Check walkability shows them in red).'); return; }
-    const note = prompt('One line for the commit: what do these edits mean inside the quest? (Maps: ' + ids.map((id) => MAPS[id].name || id).join(', ') + ')'); if (note == null) return;
-    if (!note.trim()) { msg('A meaning line is required (the standing rule: every place says its piece of the meaning).', true); return; }
+    if (!ids.length) { report('Nothing to submit: no map differs from the generated one.'); return; }
+    report('Checking that every exit and door can still be reached…'); const bad = unreachable(); if (bad.length) { report('Not submitted. An exit or a door cannot be reached on: ' + bad.join(', ') + '. Fix those first (⋯ → Check walkability shows them in red).'); return; }
+    report(''); const note = await ask('One line for the commit: what do these edits mean inside the quest?\n(Maps: ' + ids.map((id) => MAPS[id].name || id).join(', ') + ')', true); if (note == null) return;
+    if (!note.trim()) { report('Not submitted: a meaning line is required (the standing rule: every place says its piece of the meaning).'); return; }
     report('Submitting…'); $('submit').disabled = true;
     try {
       let sha; try { const r = await mcp.callTool(GH.server, 'get_file_contents', { owner: GH.owner, repo: GH.repo, path: GH.path, ref: 'refs/heads/' + GH.branch }, { cache: false }); const m = /SHA: ([0-9a-f]{40})/.exec(JSON.stringify(r)); sha = m ? m[1] : undefined; } catch (e) { if (!e || e.code !== 'tool_error') throw e; }
@@ -264,7 +274,7 @@
   };
   $('undo').onclick = () => step(undo, redo, true);
   $('redo').onclick = () => step(redo, undo, false);
-  $('reset').onclick = () => { if (!M || !edits[cur] || !confirm('Throw away every edit on this map?')) return; load(Object.assign({}, toData(), { [cur]: { cells: [] } })); undo[cur] = []; redo[cur] = []; saveDraft(); open(cur); msg('Map reset.'); };
+  $('reset').onclick = async () => { if (!M || !edits[cur] || !(await ask('Throw away every edit on this map?'))) return; load(Object.assign({}, toData(), { [cur]: { cells: [] } })); undo[cur] = []; redo[cur] = []; saveDraft(); open(cur); msg('Map reset.'); };
   $('zin').onclick = () => { const c = centre(); zoomAt(cam.z * 1.25, c[0], c[1]); }; $('zout').onclick = () => { const c = centre(); zoomAt(cam.z / 1.25, c[0], c[1]); }; $('zfit').onclick = fit;
   $('oGrid').onchange = render; $('oMark').onchange = render; $('oEdit').onchange = render; $('mapsel').onchange = (e) => open(e.target.value);
   $('more').onclick = (e) => { e.stopPropagation(); $('menu').classList.toggle('open'); };

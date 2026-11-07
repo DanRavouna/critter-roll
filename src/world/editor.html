@@ -31,6 +31,7 @@ select{max-width:46vw;text-overflow:ellipsis}
 #menu label{display:flex;gap:8px;align-items:center;color:var(--dim);padding:6px}
 #report{position:absolute;left:8px;right:8px;bottom:8px;background:var(--panel);border:2px solid var(--gold);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--dim);white-space:pre-wrap;display:none;z-index:4;font-weight:600}
 #report.open{display:block}#report b{color:var(--gold);cursor:pointer;float:right;margin-left:8px;font-size:16px}
+#ask{position:absolute;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:9;padding:12px}#ask.open{display:flex}#askbox{background:var(--panel);border:2px solid var(--edge);border-radius:12px;padding:14px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:10px}#asktext{white-space:pre-wrap;line-height:1.45}#askin{font:inherit;color:var(--ink);background:#171326;border:2px solid var(--edge);border-radius:8px;padding:10px;min-height:44px;width:100%}#askin[hidden]{display:none}#askbox .row{display:flex;gap:8px;justify-content:flex-end}
 #hint{position:absolute;left:8px;top:8px;color:var(--dim);font-size:12px;font-weight:600;background:#171326CC;padding:4px 8px;border-radius:8px;pointer-events:none;animation:hintfade 8s forwards}@keyframes hintfade{0%,80%{opacity:1}100%{opacity:0}}
 </style>
 </head>
@@ -58,6 +59,7 @@ select{max-width:46vw;text-overflow:ellipsis}
       <div style="color:var(--dim);font-size:12px;padding:4px 6px;line-height:1.6;font-weight:600">Mouse: right-click picks · Ctrl+wheel zooms · wheel pans<br>Keys: B paint · R box · F fill · E restore · 1 2 3 brush · Ctrl+Z / Ctrl+Y</div>
     </div>
     <div id="report"><b id="repclose">✕</b><span id="reptext"></span></div>
+    <div id="ask"><div id="askbox"><div id="asktext"></div><input id="askin" type="text" maxlength="200" autocomplete="off"><div class="row"><button id="askno">Cancel</button><button id="askok" style="border-color:var(--gold);color:var(--gold)">OK</button></div></div></div>
   </div>
   <div class="bar" id="strip"><button id="undo" title="Undo (Ctrl+Z)">↶</button><button id="redo" title="Redo (Ctrl+Y)">↷</button><span class="sep"></span><span id="tools" style="display:contents"></span><span class="sep"></span><span id="brush" style="display:contents"></span></div>
   <div class="bar" id="strip2"><span id="pal" style="display:contents"></span></div>

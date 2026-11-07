@@ -223,7 +223,39 @@
     if (b64.length > 60000) { msg('This draft is too large to carry in a link (' + b64.length + ' characters); export it instead.', true); return; }
     window.open(GAME + '#mapedits=' + b64, '_blank');
   };
-  $('check').onclick = check;
+  $('check').onclick = () => check();
+  // ---------- Submit: push mapedits.json to main through the viewer's GitHub connector (claude.ai page only). A GitHub Action on main then rebuilds index.html, runs the smoke tests and deploys. ----------
+  const GH = { server: 'github', owner: 'danravouna', repo: 'critter-roll', path: 'src/world/mapedits.json', branch: 'main' };
+  let mcp = null; if (window.claude && typeof window.claude.use === 'function') window.claude.use('mcp').then((ns) => { mcp = ns; if (ns) $('submit').hidden = false; }, () => {});
+  const jsonText = () => { const d = toData(), ids = Object.keys(d); return ids.length ? '{\n' + ids.map((id) => '  ' + JSON.stringify(id) + ': ' + JSON.stringify(d[id])).join(',\n') + '\n}\n' : '{}\n'; };
+  function unreachable() {   // every edited map must pass the walkability check before it goes live
+    const out = [], keep = cur; Object.keys(edits).forEach((id) => { open(id); check(); if (flags && flags.length) out.push(MAPS[id].name || id); });
+    open(keep); return out;
+  }
+  $('submit').onclick = async () => {
+    if (!mcp) return; const ids = Object.keys(edits);
+    if (!ids.length) { msg('Nothing to submit: no map differs from the generated one.', true); return; }
+    const bad = unreachable(); if (bad.length) { report('Not submitted. An exit or a door cannot be reached on: ' + bad.join(', ') + '. Fix those first (⋯ → Check walkability shows them in red).'); return; }
+    const note = prompt('One line for the commit: what do these edits mean inside the quest? (Maps: ' + ids.map((id) => MAPS[id].name || id).join(', ') + ')'); if (note == null) return;
+    if (!note.trim()) { msg('A meaning line is required (the standing rule: every place says its piece of the meaning).', true); return; }
+    report('Submitting…'); $('submit').disabled = true;
+    try {
+      let sha; try { const r = await mcp.callTool(GH.server, 'get_file_contents', { owner: GH.owner, repo: GH.repo, path: GH.path, ref: 'refs/heads/' + GH.branch }, { cache: false }); const m = /SHA: ([0-9a-f]{40})/.exec(JSON.stringify(r)); sha = m ? m[1] : undefined; } catch (e) { if (!e || e.code !== 'tool_error') throw e; }
+      const input = { owner: GH.owner, repo: GH.repo, path: GH.path, branch: GH.branch, content: jsonText(), message: 'Map edits from the editor: ' + note.trim() + '\n\nMaps: ' + ids.join(', ') + '. Submitted from the map editor page; index.html is rebuilt by the mapedits workflow.' };
+      if (sha) input.sha = sha;
+      const r = await mcp.callTool(GH.server, 'create_or_update_file', input);
+      const url = (JSON.stringify(r).match(/https:\/\/github\.com\/[^"\\]*\/commit\/[0-9a-f]+/) || [])[0];
+      report('Submitted to main. GitHub now rebuilds the game and runs the smoke tests; the site updates in a few minutes if they pass (you get an email from GitHub if they do not).' + (url ? '\nCommit: ' + url : ''));
+    } catch (e) {
+      const c = e && e.code;
+      report(c === 'server_not_connected' ? 'GitHub is not connected: add GitHub in claude.ai Settings → Connectors, then try again.'
+        : c === 'needs_reauth' ? 'GitHub needs to be reconnected in claude.ai Settings → Connectors.'
+        : c === 'approval_required' || c === 'consent_required' ? 'Not submitted: the page needs your approval to use GitHub. Allow it when asked and press Submit again.'
+        : c === 'not_in_manifest' || c === 'blocked_by_policy' ? 'Not submitted: this page is not allowed to use GitHub for you (' + c + ').'
+        : c === 'tool_error' ? 'GitHub refused the change: ' + (e.message || '') : 'Not submitted (' + (c || 'error') + '): ' + (e && e.message || '') + (c === 'server_unavailable' || c === 'upstream_error' ? ' Check the repository before trying again: the commit may still have happened.' : ''));
+    }
+    $('submit').disabled = false;
+  };
   $('undo').onclick = () => step(undo, redo, true);
   $('redo').onclick = () => step(redo, undo, false);
   $('reset').onclick = () => { if (!M || !edits[cur] || !confirm('Throw away every edit on this map?')) return; load(Object.assign({}, toData(), { [cur]: { cells: [] } })); undo[cur] = []; redo[cur] = []; saveDraft(); open(cur); msg('Map reset.'); };
